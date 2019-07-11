@@ -143,6 +143,7 @@ def clothes():
     mask = 0 #戴口罩1 不戴0
     numMask = 0
     blackGlasses = 0 #戴墨镜1 不戴0
+    numBg = 0
     color = {'红':0,'橙':0,'黄':0,'绿':0,'蓝':0,'紫':0,'粉':0,'黑':0,'白':0,'灰':0,'棕':0} #衣服颜色
     texture = {'纯色':0,'图案':0,'碎花':0,'条纹':0,'格子':0} #衣服纹理
     for i in range(0,num):
@@ -155,8 +156,18 @@ def clothes():
         mouthList = sorted(mouth.items(),key=lambda x:x[1],reverse=True)
         if mouthList[0][0] == 'surgical_mask_or_respirator':
             numMask+=1
-        if frames[i]['image']['body']['attributes']['glasses']['name'] == '戴墨镜':
-        if mouthList[0][0]
+        if frames[i]['image']['body'][0]['attributes']['glasses']['name'] == '戴墨镜':
+            numBg+=1
+        color[frames[i]['image']['body'][0]['attributes']['upper_color']['name']] += 1
+        texture[frames[i]['image']['body'][0]['attributes']['upper_wear_texture']['name']] += 1
+    print('upperWear:', upperWear)
+    print('numSuit: %d' % numSuit)
+    print('numCap: %d' % numCap)
+    print('numMask: %d' % numMask)
+    print('numSuit: %d' % numSuit)
+    print('numBg: %d' % numBg)
+    print('color: ', color)
+    print('texture: ', texture)
 
 
 
@@ -167,3 +178,4 @@ if __name__ == '__main__':
     face_occlusion()
     blink()
     light()
+    clothes()
