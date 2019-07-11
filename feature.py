@@ -2,91 +2,150 @@ import os
 import json
 
 def load_frame_json(filePath):
-    with open(filePath,'r') as file:
+    with open(filePath,'rb') as file:
         result = json.load(file)
         # print(frame['images'][0])
-        frames = result['images']
-        num = len(frames)
-    return frames,num
+        # frames = result['images']
+        num = len(result) #视频数
+    return result,num
 
 # 颜值
 def beauty():
-    frames,num = load_frame_json('frame_feature.json')
-    beautyList=[]
+    result,numVideo = load_frame_json('frame_result.json')
+    beauty = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        beautyList=[]
     # print(frames[0]['image']['face']['beauty']['score'])
     # print(len(frames))
-    for i in range(0,num):
-        beautyList.append(frames[i]['image']['face']['beauty']['score'])
-    beautyList.sort(reverse=True)
-    beauty = (beautyList[1]+beautyList[2])/2.0
-    print('beauty: %.3f' % beauty)
+    #     print(frames[0]['image']['face']['beauty']['score'])
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image'] and frames[j]['image']['face']['beauty']!=[]:
+                beautyList.append(frames[j]['image']['face']['beauty']['score'])
+        beautyList.sort(reverse=True)
+        # print(beautyList)
+        beauty.append((beautyList[1]+beautyList[2])/2.0)
+    print('beauty:', beauty)
     return beauty
 
 # 面色状态
 def skin_status():
-    frames,num = load_frame_json('frame_feature.json')
-    darkCircle = 0.0
-    stain = 0.0
-    acne = 0.0
-    health = 0.0
-    for i in range(0,num):
-        darkCircle += frames[i]['image']['face']['skinstatus']['dark_circle']
-        stain += frames[i]['image']['face']['skinstatus']['stain']
-        acne += frames[i]['image']['face']['skinstatus']['acne']
-        health += frames[i]['image']['face']['skinstatus']['health']
-    darkCircle /= num
-    stain /= num
-    acne /= num
-    health /= num
-    print('darkCircle: %.3f' % darkCircle)
-    print('stain: %.3f' % stain)
-    print('acne: %.3f' % acne)
-    print('health: %.3f' % health)
+    result,numVideo = load_frame_json('frame_result.json')
+    darkCircle = []
+    stain = []
+    acne = []
+    health = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        num = numFrame# 帧数
+        sumDarkCircle = 0
+        sumStain = 0
+        sumAcne = 0
+        sumHealth = 0
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image'] and frames[j]['image']['face']['skinstatus']!= []:
+                sumDarkCircle += frames[j]['image']['face']['skinstatus']['dark_circle']
+                sumStain += frames[j]['image']['face']['skinstatus']['stain']
+                sumAcne += frames[j]['image']['face']['skinstatus']['acne']
+                sumHealth += frames[j]['image']['face']['skinstatus']['health']
+            else:
+                num -= 1
+        sumDarkCircle /= num
+        sumStain /= num
+        sumAcne /= num
+        sumHealth /= num
+        # print(i)
+        # print('darkCircle: ', sumDarkCircle)
+        # print('stain: ', sumStain)
+        # print('acne: ', sumAcne)
+        # print('health: ', sumHealth)
+        darkCircle.append(sumDarkCircle)
+        stain.append(sumStain)
+        acne.append(sumAcne)
+        health.append(sumHealth)
+    print('darkCircle: ' , darkCircle)
+    print('stain: ' , stain)
+    print('acne: ' , acne)
+    print('health: ' ,health)
     return darkCircle, stain, acne, health
 
 # 面部遮挡
 def face_occlusion():
-    frames,num = load_frame_json('frame_feature.json')
+    result,numVideo = load_frame_json('frame_result.json')
     # 0无遮挡 1有遮挡
-    left_eye = 0
-    right_eye = 0
-    nose = 0
-    mouth = 0
-    left_cheek = 0
-    right_cheek = 0
-    chin_contour = 0
+    left_eye = []
+    right_eye = []
+    nose = []
+    mouth = []
+    left_cheek = []
+    right_cheek = []
+    chin_contour = []
     # 阈值为API推荐阈值
-    for i in range(0,num):
-        if frames[i]['image']['face']['face_quality']['occlusion']['left_eye']>0.6:
-            left_eye = 1
-        if frames[i]['image']['face']['face_quality']['occlusion']['right_eye']>0.6:
-            right_eye = 1
-        if frames[i]['image']['face']['face_quality']['occlusion']['nose']>0.7:
-            nose = 1
-        if frames[i]['image']['face']['face_quality']['occlusion']['mouth']>0.7:
-            mouth = 1
-        if frames[i]['image']['face']['face_quality']['occlusion']['left_cheek']>0.8:
-            left_cheek = 1
-        if frames[i]['image']['face']['face_quality']['occlusion']['right_eye']>0.8:
-            right_cheek = 1
-        if frames[i]['image']['face']['face_quality']['occlusion']['chin_contour']>0.6:
-            chin_contour = 1
-    print('left_eye: %d'%left_eye)
-    print('right_eye: %d' % right_eye)
-    print('nose: %d' % nose)
-    print('mouth: %d' % mouth)
-    print('left_cheek: %d' % left_cheek)
-    print('right_cheek: %d' % right_cheek)
-    print('chin_contour: %d' % chin_contour)
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        row_left_eye=[]
+        row_right_eye=[]
+        row_nose=[]
+        row_mouth=[]
+        row_left_cheek=[]
+        row_right_cheek=[]
+        row_chin_contour=[]
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image']:
+                if frames[j]['image']['face']['face_quality']['occlusion']['left_eye']>0.6:
+                    row_left_eye.append(1)
+                else:
+                    row_left_eye.append(0)
+                if frames[j]['image']['face']['face_quality']['occlusion']['right_eye']>0.6:
+                    row_right_eye.append(1)
+                else:
+                    row_right_eye.append(0)
+                if frames[j]['image']['face']['face_quality']['occlusion']['nose']>0.7:
+                    row_nose.append(1)
+                else:
+                    row_nose.append(0)
+                if frames[j]['image']['face']['face_quality']['occlusion']['mouth']>0.7:
+                    row_mouth.append(1)
+                else:
+                    row_mouth.append(0)
+                if frames[j]['image']['face']['face_quality']['occlusion']['left_cheek']>0.8:
+                    row_left_cheek.append(1)
+                else:
+                    row_left_cheek.append(0)
+                if frames[j]['image']['face']['face_quality']['occlusion']['right_eye']>0.8:
+                    row_right_cheek.append(1)
+                else:
+                    row_right_cheek.append(0)
+                if frames[j]['image']['face']['face_quality']['occlusion']['chin_contour']>0.6:
+                    row_chin_contour.append(1)
+                else:
+                    row_chin_contour.append(0)
+        left_eye.append(row_left_eye)
+        right_eye.append(row_right_eye)
+        nose.append(row_nose)
+        mouth.append(row_mouth)
+        left_cheek.append(row_left_cheek)
+        right_cheek.append(row_right_cheek)
+        chin_contour.append(row_chin_contour)
+    print('left_eye: ',left_eye)
+    print('right_eye: ' , right_eye)
+    print('nose: ' , nose)
+    print('mouth: ' , mouth)
+    print('left_cheek: ' , left_cheek)
+    print('right_cheek: ' , right_cheek)
+    print('chin_contour: ' , chin_contour)
     return left_eye, right_eye, nose, mouth, left_cheek, right_cheek, chin_contour
 
 # 眨眼次数
 def blink():
-    frames,num = load_frame_json('frame_feature.json')
+    frames,numVideo = load_frame_json('frame_result.json')
     blink = 0
     leftEyeList = []
     rightEyeList = []
-    for i in range(0,num):
+    for i in range(0,numVideo):
         # leftEyeList.append(frames[i]['image']['face']['eyestatus']['left_eye_status']['normal_glass_eye_open'])
         # leftEyeList.append(frames[i]['image']['face']['eyestatus']['left_eye_status']['no_glass_eye_close'])
         # leftEyeList.append(frames[i]['image']['face']['eyestatus']['left_eye_status']['occlusion'])
@@ -117,19 +176,27 @@ def blink():
 
 # 光线
 def light():
-    frames, num = load_frame_json('frame_feature.json')
+    result,numVideo = load_frame_json('frame_result.json')
     # 光线良好为1 不好为0
-    light = 0
-    numLight = 0
-    for i in range(0,num):
+    light = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        num = numFrame
+        rowLight=[]
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image']:
         # print(frames[i]['image']['face']['face_quality']['illumination'])
-        if frames[i]['image']['face']['face_quality']['illumination'] > 40:
-            numLight+=1
-    if numLight >= 7:
-        light = 1
-    else:
-        light = 0
-    print('light: %d'%light)
+                if frames[j]['image']['face']['face_quality']['illumination'] > 40:
+                    rowLight.append(1)
+                else:
+                    rowLight.append(0)
+            # else:
+            #     num -= 1
+        # if numLight >= num/3*4:
+        #     light[i] = 1
+        light.append(rowLight)
+    print('light: ',light)
     return light
 
 # 衣着
@@ -139,7 +206,7 @@ def clothes():
     suit = 0 #正装1 非正装0
     numSuit = 0
     cap = 0 #戴帽子1 不戴0
-    numCap = 0 #无帽帧数
+    numCap = 0 #戴帽帧数
     mask = 0 #戴口罩1 不戴0
     numMask = 0
     blackGlasses = 0 #戴墨镜1 不戴0
@@ -147,10 +214,10 @@ def clothes():
     color = {'红':0,'橙':0,'黄':0,'绿':0,'蓝':0,'紫':0,'粉':0,'黑':0,'白':0,'灰':0,'棕':0} #衣服颜色
     texture = {'纯色':0,'图案':0,'碎花':0,'条纹':0,'格子':0} #衣服纹理
     for i in range(0,num):
-        upperWear[frames[i]['image']['body']['attributes']['upper_wear']['name']] += 1
-        if frames[i]['image']['body']['attributes']['upper_wear_fg']['name'] == '西装':
+        upperWear[frames[i]['image']['body'][0]['attributes']['upper_wear']['name']] += 1
+        if frames[i]['image']['body'][0]['attributes']['upper_wear_fg']['name'] == '西装':
             numSuit+=1
-        if frames[i]['image']['body']['attributes']['headwear']['name'] == '无帽':
+        if frames[i]['image']['body'][0]['attributes']['headwear']['name'] != '无帽':
             numCap+=1
         mouth = frames[i]['image']['face']['mouthstatus']
         mouthList = sorted(mouth.items(),key=lambda x:x[1],reverse=True)
@@ -169,13 +236,10 @@ def clothes():
     print('color: ', color)
     print('texture: ', texture)
 
-
-
-
 if __name__ == '__main__':
     beauty()
     skin_status()
     face_occlusion()
-    blink()
+    # blink()
     light()
-    clothes()
+    # clothes()
