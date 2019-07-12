@@ -1,5 +1,6 @@
 import os
 import json
+import math
 
 def load_frame_json(filePath):
     with open(filePath,'rb') as file:
@@ -201,40 +202,153 @@ def light():
 
 # 衣着
 def clothes():
-    frames, num = load_frame_json('frame_feature.json')
-    upperWear = {'长袖':0,'短袖':0} #长袖1 短袖0
-    suit = 0 #正装1 非正装0
-    numSuit = 0
-    cap = 0 #戴帽子1 不戴0
-    numCap = 0 #戴帽帧数
-    mask = 0 #戴口罩1 不戴0
-    numMask = 0
-    blackGlasses = 0 #戴墨镜1 不戴0
-    numBg = 0
-    color = {'红':0,'橙':0,'黄':0,'绿':0,'蓝':0,'紫':0,'粉':0,'黑':0,'白':0,'灰':0,'棕':0} #衣服颜色
-    texture = {'纯色':0,'图案':0,'碎花':0,'条纹':0,'格子':0} #衣服纹理
-    for i in range(0,num):
-        upperWear[frames[i]['image']['body'][0]['attributes']['upper_wear']['name']] += 1
-        if frames[i]['image']['body'][0]['attributes']['upper_wear_fg']['name'] == '西装':
-            numSuit+=1
-        if frames[i]['image']['body'][0]['attributes']['headwear']['name'] != '无帽':
-            numCap+=1
-        mouth = frames[i]['image']['face']['mouthstatus']
-        mouthList = sorted(mouth.items(),key=lambda x:x[1],reverse=True)
-        if mouthList[0][0] == 'surgical_mask_or_respirator':
-            numMask+=1
-        if frames[i]['image']['body'][0]['attributes']['glasses']['name'] == '戴墨镜':
-            numBg+=1
-        color[frames[i]['image']['body'][0]['attributes']['upper_color']['name']] += 1
-        texture[frames[i]['image']['body'][0]['attributes']['upper_wear_texture']['name']] += 1
-    print('upperWear:', upperWear)
-    print('numSuit: %d' % numSuit)
-    print('numCap: %d' % numCap)
-    print('numMask: %d' % numMask)
-    print('numSuit: %d' % numSuit)
-    print('numBg: %d' % numBg)
-    print('color: ', color)
-    print('texture: ', texture)
+    result,numVideo = load_frame_json('frame_result.json')
+    upperWearList = []
+    suit = [] #正装1 非正装0
+    cap = [] #戴帽子1 不戴0
+    mask = [] #戴口罩1 不戴0
+    blackGlasses = [] #戴墨镜1 不戴0
+    colorList = []
+    textureList = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        upperWear = {'长袖': 0, '短袖': 0}  # 长袖1 短袖0
+        rowSuit = []
+        rowCap = []  # 戴帽帧数
+        rowMask = []
+        rowBg = []
+        color = {'红': 0, '橙': 0, '黄': 0, '绿': 0, '蓝': 0, '紫': 0, '粉': 0, '黑': 0, '白': 0, '灰': 0, '棕': 0}  # 衣服颜色
+        texture = {'纯色': 0, '图案': 0, '碎花': 0, '条纹或格子': 0}  # 衣服纹理
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image']:
+                upperWear[frames[j]['image']['body']['attributes']['upper_wear']['name']] += 1
+                if frames[j]['image']['body']['attributes']['upper_wear_fg']['name'] == '西装':
+                    rowSuit.append(1)
+                else:
+                    rowSuit.append(0)
+                if frames[j]['image']['body']['attributes']['headwear']['name'] != '无帽':
+                    rowCap.append(1)
+                else:
+                    rowCap.append(0)
+                mouth = frames[j]['image']['face']['mouthstatus']
+                if mouth != []:
+                    mouthList = sorted(mouth.items(),key=lambda x:x[1],reverse=True)
+                    if mouthList[0][0] == 'surgical_mask_or_respirator':
+                        rowMask.append(1)
+                    else:
+                        rowMask.append(0)
+                if frames[j]['image']['body']['attributes']['glasses']['name'] == '戴墨镜':
+                    rowBg.append(1)
+                else:
+                    rowBg.append(0)
+                color[frames[j]['image']['body']['attributes']['upper_color']['name']] += 1
+                texture[frames[j]['image']['body']['attributes']['upper_wear_texture']['name']] += 1
+                # print('j:',j)
+        suit.append(rowSuit)
+        cap.append(rowCap)
+        mask.append(rowMask)
+        blackGlasses.append(rowBg)
+        upperWearList.append(upperWear)
+        colorList.append(color)
+        textureList.append(texture)
+        # print('i:',i)
+    print('upperWear:', upperWearList)
+    print('suit: ' ,suit)
+    print('cap: ' , cap)
+    print('mask: ' , mask)
+    print('suit: ' , suit)
+    print('blackGlasses: ' , blackGlasses)
+    print('color: ', colorList)
+    print('texture: ', textureList)
+
+#是否有手势
+def has_gesture():
+    result,numVideo = load_frame_json('frame_result.json')
+    hasGesture = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        rowGesture = []
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image'] and frames[j]['image']['gesture']!=[]:
+                for k in frames[j]['image']['gesture']:
+                    if k['classname'] != 'Face':
+                        rowGesture.append(1)
+                        break
+                    else:
+                        rowGesture.append(0)
+        hasGesture.append(rowGesture)
+    print('hasGesture: ',hasGesture)
+    return hasGesture
+
+def head_angle():
+    result,numVideo = load_frame_json('frame_result.json')
+    yawHead = []
+    pitchHead = []
+    rollHead = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        sumYaw = 0
+        sumPitch = 0
+        sumRoll = 0
+        for j in range(0,numFrame-1):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j+1]['image']:
+                sumYaw += abs(float(frames[j]['image']['face']['headpose']['yaw_angle'])-float(frames[j+1]['image']['face']['headpose']['yaw_angle']))
+                sumPitch += abs(float(
+                    frames[j]['image']['face']['headpose']['pitch_angle']) - float(frames[j + 1]['image']['face']['headpose'][
+                        'pitch_angle']))
+                sumRoll += abs(float(
+                    frames[j]['image']['face']['headpose']['roll_angle']) - float(frames[j + 1]['image']['face']['headpose'][
+                        'roll_angle']))
+        yawHead.append(sumYaw)
+        pitchHead.append(sumPitch)
+        rollHead.append(sumRoll)
+    print('yawHead: ', yawHead)
+    print('pitchHead: ', pitchHead)
+    print('rollHead: ', rollHead)
+    return yawHead, pitchHead, rollHead
+
+#身体晃动
+def body_shake():
+    result,numVideo = load_frame_json('frame_result.json')
+    bodyShake = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        sumShake = 0
+        for j in range(0,numFrame-1):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j + 1]['image'] and \
+                    (frames[j]['image']['skeleton']['body_parts']['left_shoulder']['x'] != 0.0 and \
+                    frames[j+1]['image']['skeleton']['body_parts']['left_shoulder']['x'] != 0.0):
+                sumShake += math.sqrt(pow(frames[j]['image']['skeleton']['body_parts']['left_shoulder']['x'] -
+                                          frames[j+1]['image']['skeleton']['body_parts']['left_shoulder']['x'],2) +
+                                      pow(frames[j]['image']['skeleton']['body_parts']['left_shoulder']['y'] -
+                                          frames[j + 1]['image']['skeleton']['body_parts']['left_shoulder']['y'], 2)
+                                      )
+        bodyShake.append(sumShake)
+    print('bodyShake: ',bodyShake)
+    return bodyShake
+
+#情绪多样性
+def emotion_diversity():
+    result,numVideo = load_frame_json('frame_result.json')
+    emotionDiversity = []
+    for i in range(0,numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        emotionDic = {'sadness':0,'neutral':0,'disgust':0,'anger':0,'surprise':0,'fear':0,'happiness':0, 'angry':0, 'happy':0,'sad':0}
+        for j in range(0,numFrame):
+            if 'error' not in frames[j]['image']:
+                emotion = frames[j]['image']['face']['emotion']
+                emotionList = sorted(emotion.items(),key=lambda x:x[1],reverse=True)
+                if emotionList[0][0] in emotionDic:
+                    emotionDic[emotionList[0][0]]+=1
+        # print(i,': ',emotionDic)
+        emotionDiversity.append(emotionDic)
+    print('emotionDiversity: ', emotionDiversity)
+    return emotionDiversity
 
 if __name__ == '__main__':
     beauty()
@@ -242,4 +356,8 @@ if __name__ == '__main__':
     face_occlusion()
     # blink()
     light()
-    # clothes()
+    clothes()
+    has_gesture()
+    head_angle()
+    body_shake()
+    emotion_diversity()
