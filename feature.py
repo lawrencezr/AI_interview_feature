@@ -1,6 +1,8 @@
 import os
 import json
 import math
+import pandas as pd
+
 
 def load_frame_json(filePath):
     with open(filePath,'rb') as file:
@@ -28,11 +30,12 @@ def beauty():
         # print(beautyList)
         beauty.append((beautyList[1]+beautyList[2])/2.0)
     print('beauty:', beauty)
+
     return beauty
 
 # 面色状态
 def skin_status():
-    result,numVideo = load_frame_json('frame_result.json')
+    result,numVideo= load_frame_json('frame_result.json')
     darkCircle = []
     stain = []
     acne = []
@@ -257,10 +260,10 @@ def clothes():
     print('suit: ' ,suit)
     print('cap: ' , cap)
     print('mask: ' , mask)
-    print('suit: ' , suit)
     print('blackGlasses: ' , blackGlasses)
     print('color: ', colorList)
     print('texture: ', textureList)
+    return suit
 
 #是否有手势
 def has_gesture():
@@ -282,6 +285,7 @@ def has_gesture():
     print('hasGesture: ',hasGesture)
     return hasGesture
 
+# 头部晃动角度
 def head_angle():
     result,numVideo = load_frame_json('frame_result.json')
     yawHead = []
@@ -351,13 +355,24 @@ def emotion_diversity():
     return emotionDiversity
 
 if __name__ == '__main__':
-    beauty()
-    skin_status()
-    face_occlusion()
-    # blink()
-    light()
-    clothes()
-    has_gesture()
-    head_angle()
-    body_shake()
-    emotion_diversity()
+    result,numVideo= load_frame_json('frame_result.json')
+    videoList = []
+    for i in range(0, numVideo):
+        videoList.append(result[i]['video_info']['question_id'])
+    beauty = beauty()
+    darkCircle, stain, acne, health = skin_status()
+    # face_occlusion()
+    # # blink()
+    # light()
+    # clothes()
+    # has_gesture()
+    yawHead, pitchHead, rollHead = head_angle()
+    bodyShake = body_shake()
+    # emotion_diversity()
+    df = pd.DataFrame({'id':videoList,'beauty':beauty, 'darkCircle':darkCircle,
+                       'stain':stain, 'acne':acne,'health':health, 'yawHead':yawHead,
+                       'pitchHead':pitchHead, 'rollHead':rollHead,'bodyShake':bodyShake})
+    df.to_csv('result.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health',
+                                                'yawHead','pitchHead','rollHead','bodyShake'])
+    df_clothes = pd.DataFrame()
+    df_clothes.to_csv()
