@@ -248,6 +248,11 @@ def clothes():
                 color[frames[j]['image']['body']['attributes']['upper_color']['name']] += 1
                 texture[frames[j]['image']['body']['attributes']['upper_wear_texture']['name']] += 1
                 # print('j:',j)
+            else:
+                rowSuit.append('error')
+                rowBg.append('error')
+                rowMask.append('error')
+                rowCap.append('error')
         suit.append(rowSuit)
         cap.append(rowCap)
         mask.append(rowMask)
@@ -374,5 +379,10 @@ if __name__ == '__main__':
                        'pitchHead':pitchHead, 'rollHead':rollHead,'bodyShake':bodyShake})
     df.to_csv('result.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health',
                                                 'yawHead','pitchHead','rollHead','bodyShake'])
-    df_clothes = pd.DataFrame()
-    df_clothes.to_csv()
+    suit = clothes()
+    columes = ['id','frame_1','frame_2','frame_3','frame_4','frame_5','frame_6','frame_7',
+               'frame_8','frame_9','frame_10']
+    for i in range(0,len(suit)):
+        suit[i].insert(0,videoList[i])
+    df_clothes = pd.DataFrame(columns=columes,data=suit)
+    df_clothes.to_csv('result_clothes.csv',index=False)
