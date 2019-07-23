@@ -215,6 +215,7 @@ def clothes():
     textureList = []
     for i in range(0,numVideo):
         frames = result[i]['images']
+        suit.append(0)
         numFrame = len(frames)
         upperWear = {'长袖': 0, '短袖': 0}  # 长袖1 短袖0
         rowSuit = []
@@ -227,9 +228,8 @@ def clothes():
             if 'error' not in frames[j]['image']:
                 upperWear[frames[j]['image']['body']['attributes']['upper_wear']['name']] += 1
                 if frames[j]['image']['body']['attributes']['upper_wear_fg']['name'] == '西装':
-                    rowSuit.append(1)
-                else:
-                    rowSuit.append(0)
+                    # rowSuit.append(1)
+                    suit[i]=1
                 if frames[j]['image']['body']['attributes']['headwear']['name'] != '无帽':
                     rowCap.append(1)
                 else:
@@ -253,7 +253,7 @@ def clothes():
                 rowBg.append('error')
                 rowMask.append('error')
                 rowCap.append('error')
-        suit.append(rowSuit)
+        # suit.append(rowSuit)
         cap.append(rowCap)
         mask.append(rowMask)
         blackGlasses.append(rowBg)
@@ -373,16 +373,17 @@ if __name__ == '__main__':
     # has_gesture()
     yawHead, pitchHead, rollHead = head_angle()
     bodyShake = body_shake()
+    suit = clothes()
     # emotion_diversity()
     df = pd.DataFrame({'id':videoList,'beauty':beauty, 'darkCircle':darkCircle,
-                       'stain':stain, 'acne':acne,'health':health, 'yawHead':yawHead,
+                       'stain':stain, 'acne':acne,'health':health, 'suit':suit,'yawHead':yawHead,
                        'pitchHead':pitchHead, 'rollHead':rollHead,'bodyShake':bodyShake})
-    df.to_csv('result.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health',
+    df.to_csv('result.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health','suit',
                                                 'yawHead','pitchHead','rollHead','bodyShake'])
-    suit = clothes()
-    columes = ['id','frame_1','frame_2','frame_3','frame_4','frame_5','frame_6','frame_7',
-               'frame_8','frame_9','frame_10']
-    for i in range(0,len(suit)):
-        suit[i].insert(0,videoList[i])
-    df_clothes = pd.DataFrame(columns=columes,data=suit)
-    df_clothes.to_csv('result_clothes.csv',index=False)
+
+    # columes = ['id','frame_1','frame_2','frame_3','frame_4','frame_5','frame_6','frame_7',
+    #            'frame_8','frame_9','frame_10']
+    # for i in range(0,len(suit)):
+    #     suit[i].insert(0,videoList[i])
+    # df_clothes = pd.DataFrame(columns=columes,data=suit)
+    # df_clothes.to_csv('result_clothes.csv',index=False)
