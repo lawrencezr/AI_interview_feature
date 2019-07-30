@@ -1,4 +1,5 @@
-audio_feature.json
-frame_feature.json
-frame_result.json
-*.csv
+files/
+model/
+previous_result/
+result/
+train/

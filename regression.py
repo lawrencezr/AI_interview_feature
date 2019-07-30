@@ -6,9 +6,10 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.externals import joblib
 
 def read_data():
-    label_label = pd.read_csv('appearance.csv')
+    label_label = pd.read_csv('train/appearance.csv')
     df = pd.DataFrame(label_label)
     data = df.values
     size = data.shape[0]
@@ -50,7 +51,8 @@ def read_data():
 
 def generate_data_set():
     beauty, appearance, appearance_defect, affinity, clothes, body_shape = read_data()
-    load_feature = pd.read_csv('result.csv')
+    load_feature = pd.read_csv('train/result.csv')
+    print(np.isnan(load_feature).any()==False)
     df = pd.DataFrame(load_feature)
     data = df.values
     size = data.shape[0]
@@ -116,6 +118,7 @@ def regression():
     ## 形象气质
     lr_beauty = linear_model.LinearRegression()
     lr_beauty.fit(x_beauty_train,y_beauty_train)
+    joblib.dump(lr_beauty,'model/lr_beauty.m')
     print('lr_beauty_coef: ',lr_beauty.coef_)
     print('lr_beauty_intercept: ', lr_beauty.intercept_)
     y_beauty_pred = lr_beauty.predict(x_beauty_test)
@@ -125,6 +128,7 @@ def regression():
     ## 仪容仪表
     lr_appearance = linear_model.LinearRegression()
     lr_appearance.fit(x_appearance_train,y_appearance_train)
+    joblib.dump(lr_appearance, 'model/lr_appearance.m')
     print('lr_appearance_coef: ',lr_appearance.coef_)
     print('lr_appearance_intercept: ', lr_appearance.intercept_)
     y_appearance_pred = lr_appearance.predict(x_appearance_test)
@@ -134,6 +138,7 @@ def regression():
     ## 形象缺陷
     lr_appearance_defect = linear_model.LinearRegression()
     lr_appearance_defect.fit(x_appearance_defect_train,y_appearance_defect_train)
+    joblib.dump(lr_appearance_defect, 'model/lr_appearance_defect.m')
     print('lr_appearance_defect_coef: ',lr_appearance_defect.coef_)
     print('lr_appearance_defect_intercept: ', lr_appearance_defect.intercept_)
     y_appearance_defect_pred = lr_beauty.predict(x_appearance_defect_test)
@@ -143,6 +148,7 @@ def regression():
     ## 形象亲和
     lr_affinity = linear_model.LinearRegression()
     lr_affinity.fit(x_affinity_train,y_affinity_train)
+    joblib.dump(lr_affinity, 'model/lr_affinity.m')
     print('lr_affinity_coef: ',lr_affinity.coef_)
     print('lr_affinity_intercept: ', lr_affinity.intercept_)
     y_affinity_pred = lr_affinity.predict(x_affinity_test)
@@ -152,6 +158,7 @@ def regression():
     ## 面试着装
     lr_clothes = linear_model.LinearRegression()
     lr_clothes.fit(x_clothes_train,y_clothes_train)
+    joblib.dump(lr_clothes, 'model/lr_clothes.m')
     print('lr_clothes_coef: ',lr_clothes.coef_)
     print('lr_clothes_intercept: ', lr_clothes.intercept_)
     y_clothes_pred = lr_clothes.predict(x_clothes_test)
@@ -161,6 +168,7 @@ def regression():
     ## 身材外形
     lr_body_shape = linear_model.LinearRegression()
     lr_body_shape.fit(x_body_shape_train,y_body_shape_train)
+    joblib.dump(lr_body_shape, 'model/lr_body_shape.m')
     print('lr_body_shape_coef: ',lr_body_shape.coef_)
     print('lr_body_shape_intercept: ', lr_body_shape.intercept_)
     y_body_shape_pred = lr_body_shape.predict(x_body_shape_test)
@@ -171,4 +179,5 @@ def regression():
 
 if __name__ == '__main__':
     # read_data()
-    generate_data_set()
+    # generate_data_set()
+    regression()
