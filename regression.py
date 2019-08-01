@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import linear_model, svm
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.externals import joblib
+from sklearn.ensemble import BaggingRegressor,RandomForestRegressor
 from sklearn.preprocessing import PolynomialFeatures
 
 def preprocess(x):
@@ -252,12 +253,23 @@ def regression():
     # x_affinity_test = quadratic.fit_transform(x_affinity_test)
     # x_clothes_test = quadratic.fit_transform(x_clothes_test)
     # x_body_shape_test = quadratic.fit_transform(x_body_shape_test)
+    n_estimators = 10
+    max_sample = 0.5
+    max_features = 0.5
+    bootstrap = False
+    bootstrap_features = False
+    # x_beauty_train = np.array(x_beauty_train)
+    # x_beauty_test= np.array(x_beauty_test)
+    # y_beauty_train= np.array(y_beauty_train)
+    # y_beauty_test= np.array(y_beauty_test)
     ## 形象气质
     print('-------------形象气质-------------')
-    lr_beauty = linear_model.LinearRegression()
+    # lr_beauty = linear_model.LinearRegression()
+    lr_beauty = BaggingRegressor(RandomForestRegressor(),n_estimators=n_estimators,max_samples=max_sample,max_features=max_features,
+                                 bootstrap=bootstrap,bootstrap_features=bootstrap_features,random_state=1,verbose=0)
     # lr_beauty = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
     lr_beauty.fit(x_beauty_train,y_beauty_train)
-    joblib.dump(lr_beauty,'model/lr_beauty_ridge.m')
+    joblib.dump(lr_beauty,'model/lr_beauty_bagging.m')
     # print('lr_beauty_coef: ',lr_beauty.coef_)
     # print('lr_beauty_intercept: ', lr_beauty.intercept_)
     y_beauty_train_pred = lr_beauty.predict(x_beauty_train)
@@ -274,10 +286,12 @@ def regression():
     print('score: {:.3f}'.format(lr_beauty.score(x_beauty_test,y_beauty_test)))
     ## 仪容仪表
     print('-------------仪容仪表-------------')
-    lr_appearance = linear_model.LinearRegression()
+    # lr_appearance = linear_model.LinearRegression()
+    lr_appearance = BaggingRegressor(RandomForestRegressor(),n_estimators=n_estimators,max_samples=max_sample,max_features=max_features,
+                                 bootstrap=bootstrap,bootstrap_features=bootstrap_features,random_state=1,verbose=1)
     # lr_appearance = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
     lr_appearance.fit(x_appearance_train,y_appearance_train)
-    joblib.dump(lr_appearance, 'model/lr_appearance_ridge.m')
+    joblib.dump(lr_appearance, 'model/lr_appearance_bagging.m')
     # print('lr_appearance_coef: ',lr_appearance.coef_)
     # print('lr_appearance_intercept: ', lr_appearance.intercept_)
     y_appearance_train_pred = lr_appearance.predict(x_appearance_train)
@@ -294,10 +308,12 @@ def regression():
     print('score: {:.3f}'.format(lr_appearance.score(x_appearance_test, y_appearance_test)))
     ## 形象缺陷
     print('-------------形象缺陷-------------')
-    lr_appearance_defect = linear_model.LinearRegression()
+    # lr_appearance_defect = linear_model.LinearRegression()
+    lr_appearance_defect = BaggingRegressor(RandomForestRegressor(),n_estimators=n_estimators,max_samples=max_sample,max_features=max_features,
+                                 bootstrap=bootstrap,bootstrap_features=bootstrap_features,random_state=1,verbose=1)
     # lr_appearance_defect = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
     lr_appearance_defect.fit(x_appearance_defect_train,y_appearance_defect_train)
-    joblib.dump(lr_appearance_defect, 'model/lr_appearance_defect_ridge.m')
+    joblib.dump(lr_appearance_defect, 'model/lr_appearance_defect_bagging.m')
     # print('lr_appearance_defect_coef: ',lr_appearance_defect.coef_)
     # print('lr_appearance_defect_intercept: ', lr_appearance_defect.intercept_)
     y_appearance_defect_train_pred = lr_beauty.predict(x_appearance_defect_train)
@@ -314,10 +330,14 @@ def regression():
     print('score: {:.3f}'.format(lr_appearance_defect.score(x_appearance_defect_test, y_appearance_defect_test)))
     ## 形象亲和
     print('-------------形象亲和-------------')
-    lr_affinity = linear_model.LinearRegression()
+    # lr_affinity = linear_model.LinearRegression()
+    lr_affinity = BaggingRegressor(RandomForestRegressor(), n_estimators=n_estimators, max_samples=max_sample,
+                                            max_features=max_features,
+                                            bootstrap=bootstrap, bootstrap_features=bootstrap_features, random_state=1,
+                                            verbose=1)
     # lr_affinity = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
     lr_affinity.fit(x_affinity_train,y_affinity_train)
-    joblib.dump(lr_affinity, 'model/lr_affinity_ridge.m')
+    joblib.dump(lr_affinity, 'model/lr_affinity_bagging.m')
     # print('lr_affinity_coef: ',lr_affinity.coef_)
     # print('lr_affinity_intercept: ', lr_affinity.intercept_)
     y_affinity_train_pred = lr_affinity.predict(x_affinity_train)
@@ -334,10 +354,14 @@ def regression():
     print('score: {:.3f}'.format(lr_affinity.score(x_affinity_test, y_affinity_test)))
     ## 面试着装
     print('-------------面试着装-------------')
-    lr_clothes = linear_model.LinearRegression()
+    # lr_clothes = linear_model.LinearRegression()
+    lr_clothes = BaggingRegressor(RandomForestRegressor(), n_estimators=n_estimators, max_samples=max_sample,
+                                            max_features=max_features,
+                                            bootstrap=bootstrap, bootstrap_features=bootstrap_features, random_state=1,
+                                            verbose=1)
     # lr_clothes = svm.SVR(kernel='rbf', C=1e3, gamma=0.1)
     lr_clothes.fit(x_clothes_train,y_clothes_train)
-    joblib.dump(lr_clothes, 'model/lr_clothes_ridge.m')
+    joblib.dump(lr_clothes, 'model/lr_clothes_bagging.m')
     # print('lr_clothes_coef: ',lr_clothes.coef_)
     # print('lr_clothes_intercept: ', lr_clothes.intercept_)
     y_clothes_train_pred = lr_clothes.predict(x_clothes_train)
@@ -376,5 +400,5 @@ def regression():
 if __name__ == '__main__':
     # read_data()
     # generate_data_set()
-    # regression()
-    relation()
+    regression()
+    # relation()

@@ -23,8 +23,8 @@ def load_frame_json(file_folder):
     return result,num
 
 # 颜值
-def beauty():
-    result,numVideo = load_frame_json('result/')
+def beauty(result,numVideo):
+    # result,numVideo = load_frame_json('result/')
     beauty = []
     for i in range(0,numVideo):
         frames = result[i]['images']
@@ -34,7 +34,7 @@ def beauty():
     # print(frames[0]['image']['face']['beauty']['score'])
     # print(len(frames))
     #     print(frames[0]['image']['face']['beauty']['score'])
-        print('video_id', video_id)
+    #     print('video_id', video_id)
         for j in range(0,numFrame):
             if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face'] and frames[j]['image']['face']['beauty']!=[]:
                 beautyList.append(frames[j]['image']['face']['beauty']['score'])
@@ -52,8 +52,8 @@ def beauty():
     return beauty
 
 # 面色状态
-def skin_status():
-    result,numVideo= load_frame_json('result/')
+def skin_status(result,numVideo):
+    # result,numVideo= load_frame_json('result/')
     darkCircle = []
     stain = []
     acne = []
@@ -67,7 +67,7 @@ def skin_status():
         sumStain = 0
         sumAcne = 0
         sumHealth = 0
-        print('video_id', video_id)
+        # print('video_id', video_id)
         for j in range(0,numFrame):
             if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face'] and \
                     frames[j]['image']['face']['skinstatus']!= []:
@@ -103,8 +103,8 @@ def skin_status():
     return darkCircle, stain, acne, health
 
 # 面部遮挡
-def face_occlusion():
-    result,numVideo = load_frame_json('frame_result.json')
+def face_occlusion(result,numVideo):
+    # result,numVideo = load_frame_json('frame_result.json')
     # 0无遮挡 1有遮挡
     left_eye = []
     right_eye = []
@@ -171,8 +171,8 @@ def face_occlusion():
     return left_eye, right_eye, nose, mouth, left_cheek, right_cheek, chin_contour
 
 # 眨眼次数
-def blink():
-    frames,numVideo = load_frame_json('frame_result.json')
+def blink(result,numVideo):
+    # frames,numVideo = load_frame_json('frame_result.json')
     blink = 0
     leftEyeList = []
     rightEyeList = []
@@ -206,8 +206,8 @@ def blink():
     return blink
 
 # 光线
-def light():
-    result,numVideo = load_frame_json('frame_result.json')
+def light(result,numVideo):
+    # result,numVideo = load_frame_json('frame_result.json')
     # 光线良好为1 不好为0
     light = []
     for i in range(0,numVideo):
@@ -231,8 +231,8 @@ def light():
     return light
 
 # 衣着
-def clothes():
-    result,numVideo = load_frame_json('result/')
+def clothes(result,numVideo):
+    # result,numVideo = load_frame_json('result/')
     upperWearList = []
     suit = [] #正装1 非正装0
     cap = [] #戴帽子1 不戴0
@@ -242,7 +242,7 @@ def clothes():
     textureList = []
     for i in range(0,numVideo):
         video_id = result[i]['video_info']['question_id']
-        print('video_id',video_id)
+        # print('video_id',video_id)
         frames = result[i]['images']
         suit.append(-1)
         numFrame = len(frames)
@@ -300,8 +300,8 @@ def clothes():
     return suit
 
 #是否有手势
-def has_gesture():
-    result,numVideo = load_frame_json('frame_result.json')
+def has_gesture(result,numVideo):
+    # result,numVideo = load_frame_json('frame_result.json')
     hasGesture = []
     for i in range(0,numVideo):
         frames = result[i]['images']
@@ -320,14 +320,14 @@ def has_gesture():
     return hasGesture
 
 # 头部晃动角度
-def head_angle():
-    result,numVideo = load_frame_json('result/')
+def head_angle(result,numVideo):
+    # result,numVideo = load_frame_json('result/')
     yawHead = []
     pitchHead = []
     rollHead = []
     for i in range(0,numVideo):
         video_id = result[i]['video_info']['question_id']
-        print('video_id',video_id)
+        # print('video_id',video_id)
         frames = result[i]['images']
         numFrame = len(frames)
         sumYaw = 0
@@ -352,12 +352,12 @@ def head_angle():
     return yawHead, pitchHead, rollHead
 
 #身体晃动
-def body_shake():
-    result,numVideo = load_frame_json('result/')
+def body_shake(result,numVideo):
+    # result,numVideo = load_frame_json('result/')
     bodyShake = []
     for i in range(0,numVideo):
         video_id = result[i]['video_info']['question_id']
-        print('video_id',video_id)
+        # print('video_id',video_id)
         frames = result[i]['images']
         numFrame = len(frames)
         sumShake = 0
@@ -376,8 +376,8 @@ def body_shake():
     return bodyShake
 
 #情绪多样性
-def emotion_diversity():
-    result,numVideo = load_frame_json('result/')
+def emotion_diversity(result,numVideo):
+    # result,numVideo = load_frame_json('result/')
     emotionDiversity = []
     for i in range(0,numVideo):
         frames = result[i]['images']
@@ -394,26 +394,49 @@ def emotion_diversity():
     print('emotionDiversity: ', emotionDiversity)
     return emotionDiversity
 
+def smile(result,numVideo):
+    # result,numVideo = load_frame_json('result/')
+    smile = []
+    for i in range(numVideo):
+        frames = result[i]['images']
+        numFrame = len(frames)
+        num = numFrame
+        sumSmile = 0.0
+        for j in range(numFrame):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
+                sumSmile += frames[j]['image']['face']['smile']['value']
+            else:
+                num -= 1
+        if num == 0:
+            smile.append('NaN')
+        else:
+            smile.append(sumSmile/num)
+    print('smile: ',smile)
+    return smile
+
+
+
 if __name__ == '__main__':
     result,numVideo= load_frame_json('result/')
     videoList = []
     for i in range(0, numVideo):
         videoList.append(result[i]['video_info']['question_id'])
-    beauty = beauty()
-    darkCircle, stain, acne, health = skin_status()
+    beauty = beauty(result,numVideo)
+    darkCircle, stain, acne, health = skin_status(result,numVideo)
     # # face_occlusion()
     # # # blink()
     # # light()
     # # clothes()
     # # has_gesture()
-    yawHead, pitchHead, rollHead = head_angle()
-    bodyShake = body_shake()
-    suit = clothes()
+    yawHead, pitchHead, rollHead = head_angle(result,numVideo)
+    bodyShake = body_shake(result,numVideo)
+    suit = clothes(result,numVideo)
+    smile = smile(result,numVideo)
     # # emotion_diversity()
     df = pd.DataFrame({'id':videoList,'beauty':beauty, 'darkCircle':darkCircle,
-                       'stain':stain, 'acne':acne,'health':health, 'suit':suit,'yawHead':yawHead,
+                       'stain':stain, 'acne':acne,'health':health, 'suit':suit,'smile':smile,'yawHead':yawHead,
                        'pitchHead':pitchHead, 'rollHead':rollHead,'bodyShake':bodyShake})
-    df.to_csv('result_compare.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health','suit',
+    df.to_csv('result_compare.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health','suit','smile',
                                                 'yawHead','pitchHead','rollHead','bodyShake'])
 
     # columes = ['id','frame_1','frame_2','frame_3','frame_4','frame_5','frame_6','frame_7',
