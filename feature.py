@@ -117,50 +117,83 @@ def face_occlusion(result,numVideo):
     for i in range(0,numVideo):
         frames = result[i]['images']
         numFrame = len(frames)
-        row_left_eye=[]
-        row_right_eye=[]
-        row_nose=[]
-        row_mouth=[]
-        row_left_cheek=[]
-        row_right_cheek=[]
-        row_chin_contour=[]
+        num = numFrame
+        row_left_eye=0
+        row_right_eye=0
+        row_nose=0
+        row_mouth=0
+        row_left_cheek=0
+        row_right_cheek=0
+        row_chin_contour=0
         for j in range(0,numFrame):
             if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
                 if frames[j]['image']['face']['face_quality']['occlusion']['left_eye']>0.6:
-                    row_left_eye.append(1)
+                    row_left_eye+=1
                 else:
-                    row_left_eye.append(0)
+                    row_left_eye-=1
                 if frames[j]['image']['face']['face_quality']['occlusion']['right_eye']>0.6:
-                    row_right_eye.append(1)
+                    row_right_eye+=1
                 else:
-                    row_right_eye.append(0)
+                    row_right_eye-=1
                 if frames[j]['image']['face']['face_quality']['occlusion']['nose']>0.7:
-                    row_nose.append(1)
+                    row_nose+=1
                 else:
-                    row_nose.append(0)
+                    row_nose-=1
                 if frames[j]['image']['face']['face_quality']['occlusion']['mouth']>0.7:
-                    row_mouth.append(1)
+                    row_mouth+=1
                 else:
-                    row_mouth.append(0)
+                    row_mouth-=1
                 if frames[j]['image']['face']['face_quality']['occlusion']['left_cheek']>0.8:
-                    row_left_cheek.append(1)
+                    row_left_cheek+=1
                 else:
-                    row_left_cheek.append(0)
+                    row_left_cheek-=1
                 if frames[j]['image']['face']['face_quality']['occlusion']['right_eye']>0.8:
-                    row_right_cheek.append(1)
+                    row_right_cheek+=1
                 else:
-                    row_right_cheek.append(0)
+                    row_right_cheek-=1
                 if frames[j]['image']['face']['face_quality']['occlusion']['chin_contour']>0.6:
-                    row_chin_contour.append(1)
+                    row_chin_contour+=1
                 else:
-                    row_chin_contour.append(0)
-        left_eye.append(row_left_eye)
-        right_eye.append(row_right_eye)
-        nose.append(row_nose)
-        mouth.append(row_mouth)
-        left_cheek.append(row_left_cheek)
-        right_cheek.append(row_right_cheek)
-        chin_contour.append(row_chin_contour)
+                    row_chin_contour-=1
+            else:
+                num -= 1
+        if num == 0:
+            left_eye.append('NaN')
+            right_eye.append('NaN')
+            nose.append('NaN')
+            mouth.append('NaN')
+            left_cheek.append('NaN')
+            right_cheek.append('NaN')
+            chin_contour.append('NaN')
+        else:
+            if row_left_eye>0:
+                left_eye.append(100)
+            else:
+                left_eye.append(0)
+            if row_right_eye>0:
+                right_eye.append(100)
+            else:
+                right_eye.append(0)
+            if row_nose>0:
+                nose.append(100)
+            else:
+                nose.append(0)
+            if row_mouth>0:
+                mouth.append(100)
+            else:
+                mouth.append(0)
+            if row_left_cheek>0:
+                left_cheek.append(100)
+            else:
+                left_cheek.append(0)
+            if row_right_cheek>0:
+                right_cheek.append(100)
+            else:
+                right_cheek.append(0)
+            if row_chin_contour>0:
+                chin_contour.append(100)
+            else:
+                chin_contour.append(0)
     print('left_eye: ',left_eye)
     print('right_eye: ' , right_eye)
     print('nose: ' , nose)
@@ -170,12 +203,12 @@ def face_occlusion(result,numVideo):
     print('chin_contour: ' , chin_contour)
     return left_eye, right_eye, nose, mouth, left_cheek, right_cheek, chin_contour
 
-# 眨眼次数
+# 眨眼比例
 def blink(result,numVideo):
     # frames,numVideo = load_frame_json('frame_result.json')
-    blink = 0
-    leftEyeList = []
-    rightEyeList = []
+    blink = []
+    # leftEyeList = []
+    # rightEyeList = []
     for i in range(0,numVideo):
         # leftEyeList.append(frames[i]['image']['face']['eyestatus']['left_eye_status']['normal_glass_eye_open'])
         # leftEyeList.append(frames[i]['image']['face']['eyestatus']['left_eye_status']['no_glass_eye_close'])
@@ -191,18 +224,30 @@ def blink(result,numVideo):
         # rightEyeList.append(frames[i]['image']['face']['eyestatus']['right_eye_status']['normal_glass_eye_close'])
         # rightEyeList.append(frames[i]['image']['face']['eyestatus']['right_eye_status']['dark_glasses'])
         # rightEyeList.sort(reverse=True)
-        leftEye = frames[i]['image']['face']['eyestatus']['left_eye_status']
-        rightEye = frames[i]['image']['face']['eyestatus']['right_eye_status']
-        leftEyeList = sorted(leftEye.items(),key=lambda x:x[1],reverse=True)
-        rightEyeList = sorted(rightEye.items(),key=lambda x:x[1],reverse=True)
-        if leftEyeList[0][0] == 'normal_glass_eye_close' or leftEyeList[0][0] =='no_glass_eye_close' or \
-                rightEyeList[0][0] == 'normal_glass_eye_close' or rightEyeList[0][0] == 'no_glass_eye_close':
-            blink += 1
+        frames = result[i]['images']
+        num_frame =len(frames)
+        num = num_frame
+        count_blink = 0
+        for j in range(num_frame):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
+                leftEye = frames[i]['image']['face']['eyestatus']['left_eye_status']
+                rightEye = frames[i]['image']['face']['eyestatus']['right_eye_status']
+                leftEyeList = sorted(leftEye.items(),key=lambda x:x[1],reverse=True)
+                rightEyeList = sorted(rightEye.items(),key=lambda x:x[1],reverse=True)
+                if leftEyeList[0][0] == 'normal_glass_eye_close' or leftEyeList[0][0] =='no_glass_eye_close' or \
+                        rightEyeList[0][0] == 'normal_glass_eye_close' or rightEyeList[0][0] == 'no_glass_eye_close':
+                    count_blink += 1
+            else:
+                num-=1
+        if num == 0:
+            blink.append('NaN')
+        else:
+            blink.append(round(count_blink/num*100,2))
         # print(leftEyeList[0][0])
         # print(rightEyeList[0][0])
-        leftEyeList = []
-        rightEyeList = []
-    print('blink: %d'%blink)
+        # leftEyeList = []
+        # rightEyeList = []
+    print('blink: ', blink)
     return blink
 
 # 光线
@@ -216,17 +261,23 @@ def light(result,numVideo):
         num = numFrame
         rowLight=[]
         for j in range(0,numFrame):
-            if 'error' not in frames[j]['image']:
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
         # print(frames[i]['image']['face']['face_quality']['illumination'])
                 if frames[j]['image']['face']['face_quality']['illumination'] > 40:
-                    rowLight.append(1)
+                    rowLight+=1
                 else:
-                    rowLight.append(0)
-            # else:
-            #     num -= 1
+                    rowLight-=1
+            else:
+                num -= 1
         # if numLight >= num/3*4:
         #     light[i] = 1
-        light.append(rowLight)
+        if num == 0:
+            light.append('NaN')
+        else:
+            if rowLight>0:
+                light.append(100)
+            else:
+                light.append(0)
     print('light: ',light)
     return light
 
@@ -244,8 +295,9 @@ def clothes(result,numVideo):
         video_id = result[i]['video_info']['question_id']
         # print('video_id',video_id)
         frames = result[i]['images']
-        suit.append(-1)
+        rowSuit = 0
         numFrame = len(frames)
+        num = numFrame
         upperWear = {'长袖': 0, '短袖': 0}  # 长袖1 短袖0
         rowSuit = []
         rowCap = []  # 戴帽帧数
@@ -258,37 +310,47 @@ def clothes(result,numVideo):
                 upperWear[frames[j]['image']['body']['attributes']['upper_wear']['name']] += 1
                 if frames[j]['image']['body']['attributes']['upper_wear_fg']['name'] == '西装':
                     # rowSuit.append(1)
-                    suit[i]=1
-                if frames[j]['image']['body']['attributes']['headwear']['name'] != '无帽':
-                    rowCap.append(1)
+                    rowSuit += 1
                 else:
-                    rowCap.append(0)
-                mouth = frames[j]['image']['face']['mouthstatus']
-                if mouth != []:
-                    mouthList = sorted(mouth.items(),key=lambda x:x[1],reverse=True)
-                    if mouthList[0][0] == 'surgical_mask_or_respirator':
-                        rowMask.append(1)
-                    else:
-                        rowMask.append(0)
-                if frames[j]['image']['body']['attributes']['glasses']['name'] == '戴墨镜':
-                    rowBg.append(1)
-                else:
-                    rowBg.append(0)
+                    rowSuit -= 1
+                # if frames[j]['image']['body']['attributes']['headwear']['name'] != '无帽':
+                #     rowCap.append(1)
+                # else:
+                #     rowCap.append(0)
+                # mouth = frames[j]['image']['face']['mouthstatus']
+                # if mouth != []:
+                #     mouthList = sorted(mouth.items(),key=lambda x:x[1],reverse=True)
+                #     if mouthList[0][0] == 'surgical_mask_or_respirator':
+                #         rowMask.append(1)
+                #     else:
+                #         rowMask.append(0)
+                # if frames[j]['image']['body']['attributes']['glasses']['name'] == '戴墨镜':
+                #     rowBg.append(1)
+                # else:
+                #     rowBg.append(0)
                 color[frames[j]['image']['body']['attributes']['upper_color']['name']] += 1
                 texture[frames[j]['image']['body']['attributes']['upper_wear_texture']['name']] += 1
                 # print('j:',j)
             else:
-                rowSuit.append('error')
-                rowBg.append('error')
-                rowMask.append('error')
-                rowCap.append('error')
+                num -= 1
+        if num == 0:
+            suit.append('NaN')
+            upperWearList.append('NaN')
+            colorList.append('NaN')
+            textureList.append('NaN')
+        else:
+            if rowSuit >0:
+                suit.append(100)
+            else:
+                suit.append(0)
+            upper_wear_key = max(upperWear, key=upperWear.get)
+            res_color = max(color, key=color.get)
+            res_texture = max(texture, key=texture.get)
         # suit.append(rowSuit)
-        cap.append(rowCap)
-        mask.append(rowMask)
-        blackGlasses.append(rowBg)
-        upperWearList.append(upperWear)
-        colorList.append(color)
-        textureList.append(texture)
+        # cap.append(rowCap)
+        # mask.append(rowMask)
+        # blackGlasses.append(rowBg)
+
         # print('i:',i)
     print('upperWear:', upperWearList)
     print('suit: ' ,suit)
@@ -306,16 +368,20 @@ def has_gesture(result,numVideo):
     for i in range(0,numVideo):
         frames = result[i]['images']
         numFrame = len(frames)
-        rowGesture = []
+        num = numFrame
+        rowGesture = 0
         for j in range(0,numFrame):
             if 'error' not in frames[j]['image'] and frames[j]['image']['gesture']!=[]:
                 for k in frames[j]['image']['gesture']:
                     if k['classname'] != 'Face':
-                        rowGesture.append(1)
+                        rowGesture += 1
                         break
                     else:
-                        rowGesture.append(0)
-        hasGesture.append(rowGesture)
+                        num-=1
+        if num == 0:
+            hasGesture.append('NaN')
+        else:
+            hasGesture.append(round(rowGesture/num*100,2))
     print('hasGesture: ',hasGesture)
     return hasGesture
 
@@ -410,11 +476,101 @@ def smile(result,numVideo):
         if num == 0:
             smile.append('NaN')
         else:
-            smile.append(sumSmile/num)
+            smile.append(round(sumSmile/num,2))
     print('smile: ',smile)
     return smile
 
+def gender(result,numVideo):
+    gender=[]
+    for i in range(numVideo):
+        gender.append(0)
+        frames = result[i]['images']
+        numFrame = len(frames)
+        num = numFrame
+        count_gender = 0
+        for j in range(numFrame):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
+                if frames[j]['image']['face']['gender']=='Male':
+                    count_gender+=1
+            else:
+                num -= 1
+        if count_gender>=num/2:
+            gender[i]=100
+    print('gender： ',gender)
+    return gender
 
+def age(result,numVideo):
+    age = []
+    for i in range(numVideo):
+        frames = result[i]['images']
+        num_frame = len(frames)
+        num = num_frame
+        sum_age = 0
+        for j in range(num_frame):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
+                sum_age+=frames[j]['image']['face']
+            else:
+                num -= 1
+        age.append(int(sum_age/num))
+    print('age: ', age)
+    return age
+
+## 人种
+def ethnic(result,numVideo):
+    ethnic_ASIAN = []
+    ethnic_WHITE = []
+    ethnic_BLACK = []
+    for i in range(numVideo):
+        frames = result[i]['images']
+        num_frame =len(frames)
+        row_ethnic = {'ASIAN': 0, 'WHITE': 0, 'BLACK': 0}
+        ethnic_ASIAN.append(-1)
+        ethnic_WHITE.append(-1)
+        ethnic_BLACK.append(-1)
+        for j in range(num_frame):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
+                row_ethnic[frames[j]['image']['face']['ethnicity']] += 1
+        row_key = max(row_ethnic,key=row_ethnic.get)
+        if row_key == 'ASIAN':
+            ethnic_ASIAN[i] = 1
+        elif row_key == 'WHITE':
+            ethnic_WHITE[i] = 1
+        elif row_key == 'BLACK':
+            ethnic_BLACK[i] =1
+    return ethnic_ASIAN, ethnic_WHITE, ethnic_BLACK
+
+def face_shape(result,numVideo):
+    face_square = []
+    face_triangle = []
+    face_oval = []
+    face_heart = []
+    face_round = []
+    for i in range(numVideo):
+        frames = result[i]['images']
+        num_frame =len(frames)
+        row_hair = {'square': 0, 'triangle': 0, 'oval': 0, 'heart': 0, 'round':0}
+        face_square.append(0)
+        face_triangle.append(0)
+        face_oval.append(0)
+        face_heart.append(0)
+        face_round.append(0)
+        for j in range(num_frame):
+            if 'error' not in frames[j]['image'] and 'error' not in frames[j]['image']['face']:
+                row_hair[frames[j]['image']['face']['face_shape']] += 1
+        row_key = max(row_hair,key=row_hair.get)
+        if row_key == 'square':
+            face_square[i]=1
+        elif row_key == 'triangle':
+            face_triangle[i]=1
+        elif row_key == 'oval':
+            face_oval[i]=1
+        elif row_key == 'heart':
+            face_heart[i]=1
+        elif row_key == 'round':
+            face_round[i]=1
+        else:
+            print('out of key range')
+    return face_square, face_triangle, face_oval, face_heart, face_round
 
 if __name__ == '__main__':
     result,numVideo= load_frame_json('result/')
@@ -424,20 +580,20 @@ if __name__ == '__main__':
     beauty = beauty(result,numVideo)
     darkCircle, stain, acne, health = skin_status(result,numVideo)
     # # face_occlusion()
-    # # # blink()
     # # light()
+    # # # blink()
     # # clothes()
     # # has_gesture()
     yawHead, pitchHead, rollHead = head_angle(result,numVideo)
     bodyShake = body_shake(result,numVideo)
     suit = clothes(result,numVideo)
     smile = smile(result,numVideo)
+    gender = gender(result,numVideo)
     # # emotion_diversity()
     df = pd.DataFrame({'id':videoList,'beauty':beauty, 'darkCircle':darkCircle,
-                       'stain':stain, 'acne':acne,'health':health, 'suit':suit,'smile':smile,'yawHead':yawHead,
-                       'pitchHead':pitchHead, 'rollHead':rollHead,'bodyShake':bodyShake})
-    df.to_csv('result_compare.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health','suit','smile',
-                                                'yawHead','pitchHead','rollHead','bodyShake'])
+                       'stain':stain, 'acne':acne,'health':health, 'suit':suit,'smile':smile,'gender':gender})
+    #'yawHead':yawHead,'pitchHead':pitchHead, 'rollHead':rollHead,'bodyShake':bodyShake
+    df.to_csv('train/result.csv',index=False,columns=['id','beauty','darkCircle','stain','acne','health','suit','smile','gender'])
 
     # columes = ['id','frame_1','frame_2','frame_3','frame_4','frame_5','frame_6','frame_7',
     #            'frame_8','frame_9','frame_10']
